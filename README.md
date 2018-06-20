@@ -5,6 +5,6 @@ This repository contains a DDNS client that uses the [NS1 API](https://ns1.com/a
 
 It can be configured via command-line options (use `-h` to list all) or via a TOML config file (by default located in `/etc/ns1-ddns/config.toml`)
 
-An external server is needed to get the IP addresses. You can either use the one provided in request-server and set it up on a device outside your network or use an API provided by a service like https://whatismyipaddress.com which is used in the sample config file.
+An external server is needed to get the IP addresses. You can either use the one provided in request-server and set it up on a device outside your network or use an API provided by a service like https://whatismyipaddress.com which is used in the sample config file. Be aware of the [strict rate limiting](https://whatismyipaddress.com/api) though.
 
 **This project is in no way affiliated with or endorsed by NS1.**
