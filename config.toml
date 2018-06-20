@@ -1,0 +1,14 @@
+[Basic]
+Interval = 300
+APIKey = "Your API key"
+Zone = "Your zone name"
+
+[QueryAddresses]
+IPv4 = "https://ipv4bot.whatismyipaddress.com/" #A public API, forced to IPv4 through DNS record (A only)
+IPv6 = "https://ipv6bot.whatismyipaddress.com/" #A public API, forced to IPv6 through DNS record (AAAA only)
+
+[[Domain]]
+Name = "Your domain"
+IPv4 = true #Create A record
+IPv6 = true #Create AAAA record
+Replace = true #Replace existing entries
