@@ -93,6 +93,7 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 			newRecord.Type = "A"
 			answer := dns.NewAv4Answer(ipv4)
 			newRecord.AddAnswer(answer)
+			newRecord.Filters = nil
 			record, _, err := client.Records.Get(configuration.Basic.Zone, domain.Name, "A")
 			if err != nil {
 				if err == ns1.ErrRecordMissing {
@@ -117,6 +118,7 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 			newRecord.Type = "AAAA"
 			answer := dns.NewAv6Answer(ipv6)
 			newRecord.AddAnswer(answer)
+			newRecord.Filters = nil
 			record, _, err := client.Records.Get(configuration.Basic.Zone, domain.Name, "AAAA")
 			if err != nil {
 				if err == ns1.ErrRecordMissing {
