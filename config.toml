@@ -5,7 +5,9 @@ Zone = "Your zone name"
 
 [QueryAddresses]
 IPv4 = "https://ipv4bot.whatismyipaddress.com/" #A public API, forced to IPv4 through DNS record (A only)
+#IPv4 = "http://ipv4-addr.example.com:2460" #A custom subdomain with an A record pointing to a request-server
 IPv6 = "https://ipv6bot.whatismyipaddress.com/" #A public API, forced to IPv6 through DNS record (AAAA only)
+#IPv6 = "http://ipv6-addr.example.com:2460" #A custom subdomain with an AAAA record pointing to a request-server
 
 [[Domain]]
 Name = "Your domain"
