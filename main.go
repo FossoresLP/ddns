@@ -102,13 +102,9 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 				} else {
 					fmt.Printf("Failed to get current DNS configuration for %s: %s\n", domain.Name, err.Error())
 				}
-			} else {
-				if len(record.Answers) != 1 {
-					record.Answers = nil
-					record.AddAnswer(dns.NewAv4Answer(ipv4))
-				} else {
-					record.Answers[0] = dns.NewAv4Answer(ipv4)
-				}
+			} else if record.TTL != 60 || len(record.Answers) != 1 || record.Answers[0].String() != ipv4 {
+				record.Answers = nil
+				record.AddAnswer(dns.NewAv4Answer(ipv4))
 				record.TTL = 60
 				_, err := client.Records.Update(record)
 				if err != nil {
@@ -131,13 +127,9 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 				} else {
 					fmt.Printf("Failed to get current DNS configuration for %s: %s\n", domain.Name, err.Error())
 				}
-			} else {
-				if len(record.Answers) != 1 {
-					record.Answers = nil
-					record.AddAnswer(dns.NewAv6Answer(ipv6))
-				} else {
-					record.Answers[0] = dns.NewAv6Answer(ipv6)
-				}
+			} else if record.TTL != 60 || len(record.Answers) != 1 || record.Answers[0].String() != ipv6 {
+				record.Answers = nil
+				record.AddAnswer(dns.NewAv6Answer(ipv6))
 				record.TTL = 60
 				_, err := client.Records.Update(record)
 				if err != nil {
