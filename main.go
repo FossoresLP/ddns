@@ -88,15 +88,13 @@ func GetIPAddress(addrs QueryAddress) (ipv4, ipv6 net.IP, err error) {
 func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) {
 	for _, domain := range configuration.Domains {
 		if domain.IPv4 {
-			newRecord := dns.NewRecord(configuration.Basic.Zone, domain.Name, "A")
-			newRecord.TTL = 60
-			newRecord.Type = "A"
-			answer := dns.NewAv4Answer(ipv4)
-			newRecord.AddAnswer(answer)
-			newRecord.Filters = nil
 			record, _, err := client.Records.Get(configuration.Basic.Zone, domain.Name, "A")
 			if err != nil {
 				if err == ns1.ErrRecordMissing {
+					newRecord := dns.NewRecord(configuration.Basic.Zone, domain.Name, "A")
+					newRecord.TTL = 60
+					newRecord.Type = "A"
+					newRecord.AddAnswer(dns.NewAv4Answer(ipv4))
 					_, err = client.Records.Create(newRecord)
 					if err != nil {
 						fmt.Printf("Failed to create missing DNS record for %s: %s\n", domain.Name, err.Error())
@@ -104,24 +102,28 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 				} else {
 					fmt.Printf("Failed to get current DNS configuration for %s: %s\n", domain.Name, err.Error())
 				}
-			} else if len(record.Answers) != 1 || (*record.Answers[0]).String() != ipv4 || record.TTL != 60 {
-				newRecord.ID = record.ID
-				_, err = client.Records.Update(newRecord)
+			} else {
+				if len(record.Answers) != 1 {
+					record.Answers = nil
+					record.AddAnswer(dns.NewAv4Answer(ipv4))
+				} else {
+					record.Answers[0] = dns.NewAv4Answer(ipv4)
+				}
+				record.TTL = 60
+				_, err := client.Records.Update(record)
 				if err != nil {
 					fmt.Printf("Failed to update DNS record for %s: %s\n", domain.Name, err.Error())
 				}
 			}
 		}
 		if domain.IPv6 {
-			newRecord := dns.NewRecord(configuration.Basic.Zone, domain.Name, "AAAA")
-			newRecord.TTL = 60
-			newRecord.Type = "AAAA"
-			answer := dns.NewAv6Answer(ipv6)
-			newRecord.AddAnswer(answer)
-			newRecord.Filters = nil
 			record, _, err := client.Records.Get(configuration.Basic.Zone, domain.Name, "AAAA")
 			if err != nil {
 				if err == ns1.ErrRecordMissing {
+					newRecord := dns.NewRecord(configuration.Basic.Zone, domain.Name, "AAAA")
+					newRecord.TTL = 60
+					newRecord.Type = "AAAA"
+					newRecord.AddAnswer(dns.NewAv6Answer(ipv6))
 					_, err = client.Records.Create(newRecord)
 					if err != nil {
 						fmt.Printf("Failed to create missing DNS record for %s: %s\n", domain.Name, err.Error())
@@ -129,9 +131,15 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 				} else {
 					fmt.Printf("Failed to get current DNS configuration for %s: %s\n", domain.Name, err.Error())
 				}
-			} else if len(record.Answers) != 1 || (*record.Answers[0]).String() != ipv6 || record.TTL != 60 {
-				newRecord.ID = record.ID
-				_, err = client.Records.Update(newRecord)
+			} else {
+				if len(record.Answers) != 1 {
+					record.Answers = nil
+					record.AddAnswer(dns.NewAv6Answer(ipv6))
+				} else {
+					record.Answers[0] = dns.NewAv6Answer(ipv6)
+				}
+				record.TTL = 60
+				_, err := client.Records.Update(record)
 				if err != nil {
 					fmt.Printf("Failed to update DNS record for %s: %s\n", domain.Name, err.Error())
 				}
