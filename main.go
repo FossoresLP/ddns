@@ -67,7 +67,7 @@ func GetIPAddress(addrs QueryAddress) (ipv4, ipv6 net.IP, err error) {
 	// Get IPv6 address
 	res, err = http.Get(addrs.IPv6)
 	if err != nil {
-		return nil, nil, err
+		return ipv4, nil, nil // Fail gracefully since IPv6 is not yet supported everywhere
 	}
 	v6resp, err := ioutil.ReadAll(res.Body)
 	res.Body.Close()
@@ -112,7 +112,7 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 				}
 			}
 		}
-		if domain.IPv6 {
+		if domain.IPv6 && ipv6 != "" {
 			record, _, err := client.Records.Get(configuration.Basic.Zone, domain.Name, "AAAA")
 			if err != nil {
 				if err == ns1.ErrRecordMissing {
@@ -215,7 +215,7 @@ func main() {
 		}
 	}
 
-	v4, v6, err := GetIPAddress(configuration.QueryAddresses)
+	_, _, err := GetIPAddress(configuration.QueryAddresses)
 	if err != nil {
 		fmt.Printf("Failed to get IP address: %s\n", err.Error())
 		os.Exit(-1)
@@ -232,15 +232,17 @@ func main() {
 		}
 	}
 
-	UpdateDomains(configuration, client, v4.String(), v6.String())
-
-	for exit := false; exit == false; {
-		time.Sleep(time.Duration(configuration.Basic.Interval) * time.Second)
-		v4, v6, err = GetIPAddress(configuration.QueryAddresses)
+	for {
+		v4, v6, err := GetIPAddress(configuration.QueryAddresses)
 		if err != nil {
 			fmt.Printf("Failed to get IP address: %s\n", err.Error())
 		} else {
-			UpdateDomains(configuration, client, v4.String(), v6.String())
+			if v6 == nil {
+				UpdateDomains(configuration, client, v4.String(), "")
+			} else {
+				UpdateDomains(configuration, client, v4.String(), v6.String())
+			}
 		}
+		time.Sleep(time.Duration(configuration.Basic.Interval) * time.Second)
 	}
 }
