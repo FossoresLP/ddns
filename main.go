@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"flag"
 	"fmt"
@@ -56,7 +57,7 @@ func GetIPAddress(addrs QueryAddress) (ipv4, ipv6 net.IP, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	err = ipv4.UnmarshalText(v4resp)
+	err = ipv4.UnmarshalText(bytes.TrimSpace(v4resp))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -74,7 +75,7 @@ func GetIPAddress(addrs QueryAddress) (ipv4, ipv6 net.IP, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	err = ipv6.UnmarshalText(v6resp)
+	err = ipv6.UnmarshalText(bytes.TrimSpace(v6resp))
 	if err != nil {
 		return nil, nil, err
 	}
