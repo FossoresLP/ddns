@@ -232,17 +232,30 @@ func main() {
 		}
 	}
 
-	for {
-		v4, v6, err := GetIPAddress(configuration.QueryAddresses)
-		if err != nil {
-			fmt.Printf("Failed to get IP address: %s\n", err.Error())
+	// run first time
+	runddns(configuration, client)
+
+	if configuration.Basic.Interval <= 0 {
+		// running once only, exiting now
+		os.Exit(0)
+	}
+
+	// else run repeatedly
+	ticker := time.NewTicker(time.Duration(configuration.Basic.Interval) * time.Second)
+	for range ticker.C {
+		runddns(configuration, client)
+	}
+}
+
+func runddns(configuration Config, client *ns1.Client) {
+	v4, v6, err := GetIPAddress(configuration.QueryAddresses)
+	if err != nil {
+		fmt.Printf("Failed to get IP address: %s\n", err.Error())
+	} else {
+		if v6 == nil {
+			UpdateDomains(configuration, client, v4.String(), "")
 		} else {
-			if v6 == nil {
-				UpdateDomains(configuration, client, v4.String(), "")
-			} else {
-				UpdateDomains(configuration, client, v4.String(), v6.String())
-			}
+			UpdateDomains(configuration, client, v4.String(), v6.String())
 		}
-		time.Sleep(time.Duration(configuration.Basic.Interval) * time.Second)
 	}
 }
