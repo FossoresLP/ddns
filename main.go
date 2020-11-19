@@ -160,6 +160,19 @@ func UpdateDomains(configuration Config, client *ns1.Client, ipv4, ipv6 string) 
 	}
 }
 
+func runDDNS(configuration Config, client *ns1.Client) {
+	v4, v6, err := GetIPAddress(configuration.QueryAddresses)
+	if err != nil {
+		fmt.Printf("Failed to get IP address: %s\n", err.Error())
+	} else {
+		if v6 == nil {
+			UpdateDomains(configuration, client, v4.String(), "")
+		} else {
+			UpdateDomains(configuration, client, v4.String(), v6.String())
+		}
+	}
+}
+
 func main() {
 	var configuration Config
 
@@ -234,7 +247,7 @@ func main() {
 	}
 
 	// run first time
-	runddns(configuration, client)
+	runDDNS(configuration, client)
 
 	if configuration.Basic.Interval <= 0 {
 		// running once only, exiting now
@@ -244,19 +257,7 @@ func main() {
 	// else run repeatedly
 	ticker := time.NewTicker(time.Duration(configuration.Basic.Interval) * time.Second)
 	for range ticker.C {
-		runddns(configuration, client)
+		runDDNS(configuration, client)
 	}
 }
 
-func runddns(configuration Config, client *ns1.Client) {
-	v4, v6, err := GetIPAddress(configuration.QueryAddresses)
-	if err != nil {
-		fmt.Printf("Failed to get IP address: %s\n", err.Error())
-	} else {
-		if v6 == nil {
-			UpdateDomains(configuration, client, v4.String(), "")
-		} else {
-			UpdateDomains(configuration, client, v4.String(), v6.String())
-		}
-	}
-}
